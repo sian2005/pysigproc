@@ -46,8 +46,8 @@ class SigprocFile(object):
             except TypeError:
                 self.fp = fp
             self.read_header(self.fp)
-            self._mmdata = mmap.mmap(self.fp.fileno(), 0, mmap.MAP_PRIVATE, 
-                    mmap.PROT_READ)
+            self._mmdata = mmap.mmap(self.fp.fileno(), 0, None, 
+                    mmap.ACCESS_READ)
 
     ## See sigproc send_stuff.c
 
