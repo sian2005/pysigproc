@@ -78,30 +78,28 @@ class SigprocFile(object):
         self.send_string("HEADER_END",f=fout)
 
     ## See sigproc read_header.c
-
-    @staticmethod
-    def get_string(fp):
+    def get_string(self):
         """Read the next sigproc-format string in the file."""
-        nchar = struct.unpack('i',fp.read(4))[0]
+        nchar = struct.unpack('i',self.fp.read(4))[0]
         if nchar>80 or nchar<1: 
             return (None, 0)
-        out = fp.read(nchar)
+        out = self.fp.read(nchar)
         return (out.decode('utf-8'), nchar+4)
 
     def read_header(self,fp=None):
         """Read the header from the specified file pointer."""
         if fp is not None: self.fp = fp
         self.hdrbytes = 0
-        (s,n) = self.get_string(self.fp)
+        (s,n) = self.get_string()
         if s != 'HEADER_START':
             raise RuntimeError("File does not start with HEADER_START (read '%s')" % s)
         self.hdrbytes += n
         while True:
-            (s,n) = self.get_string(self.fp)
+            (s,n) = self.get_string()
             self.hdrbytes += n
             if s == 'HEADER_END': return
             if self._type[s] == 'string':
-                (v,n) = self.get_string(self.fp)
+                (v,n) = self.get_string()
                 self.hdrbytes += n
                 setattr(self,s,v)
             else:
@@ -166,3 +164,13 @@ class SigprocFile(object):
     @property
     def chan_freqs(self):
         return self.fch1 + numpy.arange(self.nchans)*self.foff
+
+fb = SigprocFile("voyager_f1032192_t300_v2.fil")
+print(fb.nchans)
+print(fb.nifs)
+print(fb.nbits)
+print(fb.dtype)
+print(fb.bytes_per_spectrum)
+print(fb.chan_freqs)
+print(fb.tend)
+print(fb.get_data(0, 1))
